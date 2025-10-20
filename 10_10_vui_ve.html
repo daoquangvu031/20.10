@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>10/10 Vui Vẻ 🎉</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#ffb86b}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, Arial, Helvetica, sans-serif;background:linear-gradient(180deg,#071021 0%, #0b1220 60%);color:#fff}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:40px}
+    .card{background:rgba(255,255,255,0.03);padding:34px;border-radius:18px;box-shadow:0 10px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px);text-align:center;max-width:760px;width:100%}
+
+    h1{font-size:clamp(36px,7vw,84px);margin:0;letter-spacing:2px}
+    .floating-area{position:relative;height:220px;overflow:hidden;margin-top:12px}
+    .float-text{position:absolute;left:50%;top:60%;transform:translate(-50%, -50%);font-weight:800;padding:6px 14px;border-radius:12px;background:linear-gradient(90deg,#fff 0%, #ffd37a 100%);color:#081225;display:inline-block}
+
+    /* animate multiple copies */
+    .float-blob{position:absolute;left:50%;transform:translateX(-50%);font-weight:900}
+    @keyframes riseA{0%{opacity:0;transform:translate(-50%,30px) scale(0.8) rotate(-6deg)}10%{opacity:1}100%{opacity:0;transform:translate(-50%,-260px) scale(1.06) rotate(12deg)}}
+    @keyframes riseB{0%{opacity:0;transform:translate(-50%,40px) scale(0.9) rotate(8deg)}10%{opacity:1}100%{opacity:0;transform:translate(-50%,-320px) scale(0.98) rotate(-12deg)}}
+
+    .b1{animation:riseA 3s ease-in forwards}
+    .b2{animation:riseB 4s cubic-bezier(.17,.67,.14,1.03) forwards}
+    .b3{animation:riseA 3.6s ease-in forwards}
+    .b4{animation:riseB 4.4s cubic-bezier(.17,.67,.14,1.03) forwards}
+
+    .controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+    .btn{background:linear-gradient(90deg,#ff8a00,#ffd37a);color:#081225;border:0;padding:10px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.3)}
+    .muted{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#ddd}
+
+    .qr-area{display:flex;gap:20px;align-items:center;justify-content:center;margin-top:14px}
+    .qr-area img{width:180px;height:180px;border-radius:12px;border:6px solid rgba(255,255,255,0.03);background:white}
+    small{opacity:0.6;display:block;margin-top:8px}
+
+    footer{font-size:13px;color:#9aa7c2;margin-top:18px;opacity:0.9}
+
+    /* confetti canvas overlay */
+    canvas{position:fixed;left:0;top:0;pointer-events:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>10/10 <span style="color:var(--accent)">vui vẻ</span></h1>
+      <div class="floating-area" aria-hidden="true">
+        <span class="float-text">10/10 vui vẻ</span>
+        <!-- duplicates that animate upward -->
+        <div id="blobs">
+          <!-- JS will populate duplicates for lively effect -->
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="play" class="btn">Play effect</button>
+        <button id="qrBtn" class="btn muted">Generate QR for this page</button>
+      </div>
+
+      <div class="qr-area" id="qrArea" style="display:none">
+        <div>
+          <img id="qrImg" alt="QR code" src="" />
+          <small>Quét QR bằng điện thoại để mở trang này (data URL)</small>
+        </div>
+        <div style="max-width:360px;text-align:left">
+          <strong>Hướng dẫn nhanh</strong>
+          <ul style="margin:6px 0 0 18px;padding:0;line-height:1.45">
+            <li>Mở camera hoặc app quét QR trên điện thoại.</li>
+            <li>Quét mã — trình duyệt sẽ mở nội dung trang (data URL).</li>
+            <li>Nếu trình quét chặn data URL, bạn có thể chia file HTML qua email hoặc upload lên dịch vụ lưu trữ rồi chia link.</li>
+          </ul>
+        </div>
+      </div>
+
+      <footer>Created with ❤️ — quét QR để mở trang mọi lúc</footer>
+    </div>
+  </div>
+
+  <canvas id="confetti"></canvas>
+
+  <script>
+    // --- Floating blobs generator ---
+    const blobs = document.getElementById('blobs');
+    function createBlobs(){
+      blobs.innerHTML='';
+      const texts = ['10/10 vui vẻ','10/10','vui vẻ','10/10 yay!','😊 10/10'];
+      for(let i=0;i<10;i++){
+        const d=document.createElement('div');
+        d.className='float-blob b'+((i%4)+1);
+        const size = 18 + Math.round(Math.random()*40);
+        d.style.fontSize = size+'px';
+        d.style.left = (30 + Math.random()*40) + '%';
+        d.style.top = (70 + Math.random()*12)+'%';
+        d.style.opacity=0;
+        d.textContent = texts[Math.floor(Math.random()*texts.length)];
+        d.style.animationDelay = (Math.random()*0.8)+'s';
+        d.style.animationDuration = (3 + Math.random()*1.6)+'s';
+        blobs.appendChild(d);
+      }
+      // remove after animation so next play is fresh
+      setTimeout(()=>blobs.innerHTML='',4500);
+    }
+
+    // --- Confetti ---
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = innerWidth;
+    let H = canvas.height = innerHeight;
+    window.addEventListener('resize', ()=>{W=canvas.width=innerWidth;H=canvas.height=innerHeight});
+
+    function confettiBurst(){
+      const particles = [];
+      const colors = ['#ffd37a','#ff8a00','#ff6b6b','#7effc4','#9bd1ff'];
+      for(let i=0;i<120;i++){
+        particles.push({x:W/2 + (Math.random()-0.5)*200, y:H/2 + (Math.random()-0.5)*50, vx:(Math.random()-0.5)*8, vy:Math.random()*-8-2, size:6+Math.random()*8, rot:Math.random()*360, color:colors[Math.floor(Math.random()*colors.length)], life:60+Math.random()*40});
+      }
+      let t=0;
+      function draw(){
+        ctx.clearRect(0,0,W,H);
+        for(let p of particles){
+          if(p.life>0){
+            p.x += p.vx; p.y += p.vy; p.vy += 0.28; p.life--;
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+            ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+            ctx.restore();
+          }
+        }
+        t++;
+        if(t<180) requestAnimationFrame(draw); else ctx.clearRect(0,0,W,H);
+      }
+      draw();
+    }
+
+    // wire buttons
+    document.getElementById('play').addEventListener('click', ()=>{createBlobs();confettiBurst();});
+
+    // --- QR generation: create data URL of the page and use Google Chart API to render QR ---
+    async function toDataUrlOfDocument(){
+      // get full HTML text
+      const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+      // encode and create data url
+      const b64 = btoa(unescape(encodeURIComponent(html)));
+      return 'data:text/html;base64,' + b64;
+    }
+
+    document.getElementById('qrBtn').addEventListener('click', async ()=>{
+      const dataUrl = await toDataUrlOfDocument();
+      // Google Chart API for QR (simple and widely supported)
+      const maxLen = 1800; // avoid extremely long URLs for older clients
+      const payload = encodeURIComponent(dataUrl).slice(0,2000);
+      const qrSrc = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' + payload;
+      const qrImg = document.getElementById('qrImg');
+      qrImg.src = qrSrc;
+      document.getElementById('qrArea').style.display = 'flex';
+      // for convenience, also copy the data URL to clipboard (ask for permission)
+      try{
+        await navigator.clipboard.writeText(dataUrl);
+        qrImg.alt = 'QR code (data URL copied to clipboard)';
+      }catch(e){ qrImg.alt = 'QR code (could not copy data URL)'; }
+    });
+
+    // autoplay small effect when page loads
+    window.addEventListener('load', ()=>{setTimeout(()=>{createBlobs();confettiBurst();},600)});
+  </script>
+</body>
+</html>
